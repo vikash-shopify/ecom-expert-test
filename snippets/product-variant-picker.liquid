@@ -22,15 +22,41 @@
       {{ block.shopify_attributes }}
     >
       {%- for option in product.options_with_values -%}
-        <fieldset class="js product-form__input">
+        <fieldset class="js product-form__input" {%- if option.name == 'Size' or  option.name == 'size' -%}style="display:none"{% endif %}>
           <legend class="form__label">{{ option.name }}</legend>
           {% render 'product-variant-options', product: product, option: option, block: block %}
         </fieldset>
       {%- endfor -%}
+
+     
       <script type="application/json">
         {{ product.variants | json }}
       </script>
     </variant-radios>
+     {% comment %} Add custom dropdown to select the size {% endcomment %}
+     {%- for option in product.options_with_values -%}
+      {%- if block.settings.picker_type == 'button' and option.name == 'Size' or  option.name == 'size' -%}
+      <div class="product-form__input product-form__input--dropdown">
+        <label class="form__label" for="Option-{{ section.id }}-{{ forloop.index0 }}">
+          {{ option.name }}
+        </label>
+        <span class="swatch_required_msg hidden">Please select the {{ option.name }}</span>
+       
+        <div class="select">
+          <select
+            id="Option-{{ section.id }}-{{ forloop.index0 }}"
+            class="select__select size_select--dropdown-style"
+            name="options[{{ option.name | escape }}]"
+            form="{{ product_form_id }}"
+          >
+            {% render 'product-variant-options', product: product, option: option, picker_type: 'dropdown' %}
+          </select>
+          {% render 'icon-caret' %}
+        </div>
+      </div>
+    {% endif %}
+    {%- endfor -%}
+    {% comment %} End custom dropdown  {% endcomment %}
   {%- else -%}
     <variant-selects
       id="variant-selects-{{ section.id }}"

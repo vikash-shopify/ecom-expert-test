@@ -1598,3 +1598,41 @@ a.product__text {
     border: none;
   }
 }
+/* add css for select size error msg */
+.product-form__input--dropdown{
+  position: relative;
+}
+.swatch_required_msg{
+  background-color: red;
+  color: #fff;
+  padding: 2px 20px;
+  left: 3rem;
+  font-size: 14px;
+  border-radius: 5px;
+  position: absolute;
+  top: -8px;
+  animation: shake 0.5s linear infinite alternate;
+}
+span.swatch_required_msg:after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid red;
+  font-size: 0;
+  line-height: 0;
+  float: left;
+  position: absolute;
+  bottom: -9px;
+  left: calc(50% - 7px);
+}
+
+@keyframes shake{
+  0%{
+  	transform: translateY(-7px);
+  }
+  100%{
+  	transform: translateY(0px);
+  }
+}

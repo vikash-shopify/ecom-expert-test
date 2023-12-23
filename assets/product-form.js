@@ -18,6 +18,14 @@ if (!customElements.get('product-form')) {
 
       onSubmitHandler(evt) {
         evt.preventDefault();
+        // Add custom code to Alert Unselected size
+        this.sizeSelector = document.querySelector('select[name="options[Size]"]');
+        if(this.sizeSelector && this.sizeSelector.value == "unselected"){
+          let sizeSelectError = document.querySelector('.swatch_required_msg');
+          sizeSelectError ? sizeSelectError.classList.remove('hidden') : alert("Please select the size");
+          return;
+        }
+        
         if (this.submitButton.getAttribute('aria-disabled') === 'true') return;
 
         this.handleErrorMessage();

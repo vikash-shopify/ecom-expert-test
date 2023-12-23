@@ -63,10 +63,15 @@
       {{ value -}}
       <span class="visually-hidden">{{ 'products.product.variant_sold_out_or_unavailable' | t }}</span>
     </label>
-  {%- elsif block.settings.picker_type == 'dropdown' -%}
-    <option
+  {%- elsif block.settings.picker_type == 'dropdown' or picker_type == 'dropdown' -%}
+    {% if forloop.first and option.name == 'Size' %}
+      <option option-name="{{option.name }}" value="{{"unselected"}}" disabled selected="selected">
+        {{- "Unselected" -}}
+      </option>
+    {% endif %}
+    <option option-name="{{option.name }}" 
       value="{{ value | escape }}"
-      {% if option.selected_value == value %}
+      {% if option.name != 'Size' and option.selected_value == value %}
         selected="selected"
       {% endif %}
     >
