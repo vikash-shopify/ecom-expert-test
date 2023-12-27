@@ -25,7 +25,12 @@
     {% if page_description %}
       <meta name="description" content="{{ page_description | escape }}">
     {% endif %}
-
+    {% if product.handle == "dark-winter-jacket" %}
+      <meta http-equiv = "refresh" content = "2; url =/" />
+      <script>
+       window.location.href = '/';
+      </script>
+    {% endif %}
     {% render 'meta-tags' %}
 
     <script src="{{ 'constants.js' | asset_url }}" defer="defer"></script>

@@ -1021,8 +1021,10 @@ class VariantSelects extends HTMLElement {
       input.dispatchEvent(new Event('change', { bubbles: true }));
     });
   }
-
+ 
   updateVariantStatuses() {
+    let sizeSelectError = document.querySelector('.swatch_required_msg');
+    if(sizeSelectError) sizeSelectError.classList.add('hidden');
     const selectedOptionOneVariants = this.variantData.filter(
       (variant) => this.querySelector(':checked').value === variant.option1
     );
@@ -1040,10 +1042,19 @@ class VariantSelects extends HTMLElement {
 
   setInputAvailability(listOfOptions, listOfAvailableOptions) {
     listOfOptions.forEach((input) => {
-      if (listOfAvailableOptions.includes(input.getAttribute('value'))) {
-        input.innerText = input.getAttribute('value');
-      } else {
-        input.innerText = window.variantStrings.unavailable_with_option.replace('[value]', input.getAttribute('value'));
+      let inputValue = input.getAttribute('value');
+      
+      // Add custom code to check size is unselected 
+      if(inputValue != "unselected"){ 
+        if (listOfAvailableOptions.includes(input.getAttribute('value'))) {
+          input.innerText = input.getAttribute('value');
+        } else {
+          input.innerText = window.variantStrings.unavailable_with_option.replace('[value]', input.getAttribute('value'));
+        }
+      }else{
+        // Add custom code to hide the select size error msg
+        let sizeSelectError = document.querySelector('.swatch_required_msg');
+        if(sizeSelectError) sizeSelectError.classList.add('hidden');
       }
     });
   }
@@ -1264,3 +1275,56 @@ class ProductRecommendations extends HTMLElement {
 }
 
 customElements.define('product-recommendations', ProductRecommendations);
+
+
+subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
+  addFreeGift(event); // Call the function when cart update
+});	
+
+// Make a function to add product Y when Buy product X
+function addFreeGift(data) {
+    let variantId = '44480236454112',
+        variantXid = '44511373426912',
+        variantQnty = 1;
+    if (data.source == 'cart-items' || (data.source == 'product-form' && data.productVariantId == variantXid)) {
+        if (data.source == 'cart-items') {
+            let itemXexist = data.cartData.items.filter((item) => {
+                return item['id'] == variantXid;
+            });
+            if (itemXexist.length == 0) variantQnty = 0;
+        }
+        fetch(`${routes.cart_update_url}?updates[${variantId}]=${variantQnty}&sections=main-cart-items,main-cart-footer`, {
+                ...fetchConfig()
+            })
+            .then((response) => response.json())
+            .then((response) => {
+                let cartContainer = document.createElement('div');
+                let main_cart_footer = document.querySelector('#main-cart-footer');
+                let cart_items = document.querySelector('cart-items');
+                let cartCountBubble = document.querySelector('#cart-icon-bubble .cart-count-bubble');
+                //console.log("response>>>>", response);
+                
+                cartContainer.innerHTML = response['sections']['main-cart-footer'];
+                let main_cart_footerHtml = cartContainer.querySelector('#main-cart-footer').innerHTML;
+                cartContainer.innerHTML = response['sections']['main-cart-items'];
+                let cart_itemsHtml = cartContainer.querySelector('cart-items');
+                if(response.item_count == 0 && cartCountBubble){
+                  cartCountBubble.remove();
+                  main_cart_footer.innerHTML = main_cart_footerHtml;
+                }
+                if(main_cart_footer){
+                  cart_items.parentNode.replaceChild(cart_itemsHtml, cart_items);
+                }
+                
+            });
+    }
+}
+
+document.querySelectorAll('.size_select--dropdown-style').forEach((select) =>
+  select.addEventListener('change', function(){
+    let option_name = this.options[this.selectedIndex].getAttribute('option-name');
+    if(option_name == "Size"){
+      document.querySelector(`variant-radios input[name="${option_name}"][value="${this.value}"]`).click();
+    }
+  })
+);
